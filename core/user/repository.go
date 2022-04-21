@@ -41,28 +41,26 @@ func (r *UserRepository) SaveUser(user *model.User) (*model.User, error) {
 }
 
 func (r *UserRepository) ValidateSignIn(login, password string) (string, error) {
-	user := model.User{}
+	userToSign := model.User{}
 
-	err := r.db.Where("Login = ? AND Password = ?").Error
+	err := r.db.Where("login = ? AND password = ?", login, password).
+		Take(&userToSign).
+		Error
 
 	if err != nil {
 		return "", err
 	}
 
-	err = VerifyPassword(password, user.Password)
+	err = VerifyPassword(password, userToSign.Password)
 
-	if err != nil {
-		if err == bcrypt.ErrMismatchedHashAndPassword {
-			return "", err
-		}
-
+	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
 		return "", err
 	}
 
-	token, err := token.GenerateToken(int(user.ID))
+	token, err := token.GenerateToken(int(userToSign.ID))
 
 	if err != nil {
-		return "", err
+		return "", nil
 	}
 
 	return token, nil
