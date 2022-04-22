@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -35,18 +36,12 @@ func StartDB(
 }
 
 func ConnectDB() *gorm.DB {
-	MySqlUser := "root"
-	MySqlPassword := "123456"
-	MySqlHost := "127.0.0.1"
-	MySqlPort := "3306"
-	MySqlDbName := "springfield"
-
 	StartDB(
-		MySqlUser,
-		MySqlPassword,
-		MySqlHost,
-		MySqlPort,
-		MySqlDbName,
+		os.Getenv("MYSQL_USER"),
+		os.Getenv("MYSQL_PASS"),
+		os.Getenv("MYSQL_HOST"),
+		os.Getenv("MYSQL_PORT"),
+		os.Getenv("MYSQL_DB_NAME"),
 	)
 
 	return db
