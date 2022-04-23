@@ -3,6 +3,8 @@ package routes
 import (
 	"github.com/TulioGuaraldoB/springfield/core/user"
 	"github.com/TulioGuaraldoB/springfield/db"
+	"github.com/TulioGuaraldoB/springfield/server/routes/middlewares"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,8 +21,8 @@ func ConfigRoutes() *gin.Engine {
 		{
 			v1.POST("/register", userController.Register)
 			v1.POST("/login", userController.Login)
-			v1.GET("/user", userController.GetAllUsers)
-			v1.GET("/user/:id", userController.GetUserById)
+			v1.GET("/user", middlewares.AuthMiddleware(), userController.GetAllUsers)
+			v1.GET("/user/:id", middlewares.AuthMiddleware(), userController.GetUserById)
 		}
 	}
 
