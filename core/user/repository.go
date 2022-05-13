@@ -15,7 +15,7 @@ type IUserRepository interface {
 	SaveUser(user *model.User) (*model.User, error)
 	ValidateSignIn(login, password string) (string, error)
 	GetUsers() ([]model.User, error)
-	GetUserById(userId uint) (*model.User, error)
+	GetUserById(userId uint64) (*model.User, error)
 }
 
 type UserRepository struct {
@@ -32,7 +32,6 @@ var user *model.User
 
 func (r *UserRepository) SaveUser(user *model.User) (*model.User, error) {
 	err := r.db.Create(&user).Error
-
 	if err != nil {
 		return &model.User{}, err
 	}
@@ -46,19 +45,16 @@ func (r *UserRepository) ValidateSignIn(login, password string) (string, error) 
 	err := r.db.Where("login = ? AND password = ?", login, password).
 		Take(&userToSign).
 		Error
-
 	if err != nil {
 		return "", err
 	}
 
 	err = VerifyPassword(password, userToSign.Password)
-
 	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
 		return "", err
 	}
 
 	token, err := token.GenerateToken(int(userToSign.ID))
-
 	if err != nil {
 		return "", nil
 	}
@@ -76,7 +72,7 @@ func (r *UserRepository) GetUsers() ([]model.User, error) {
 	return allUsers, nil
 }
 
-func (r *UserRepository) GetUserById(userId uint) (*model.User, error) {
+func (r *UserRepository) GetUserById(userId uint64) (*model.User, error) {
 	var user *model.User
 
 	if err := r.db.First(&user, &userId).Error; err != nil {
@@ -89,7 +85,6 @@ func (r *UserRepository) GetUserById(userId uint) (*model.User, error) {
 func BeforeSave() error {
 	var u *model.User
 
-	// turn password into Hash
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
@@ -97,7 +92,6 @@ func BeforeSave() error {
 
 	u.Password = string(hashedPassword)
 
-	// remove whitespaces in username
 	u.Login = html.EscapeString(strings.TrimSpace(u.Login))
 
 	return nil
