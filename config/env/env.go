@@ -17,6 +17,7 @@ var (
 	MySqlDbName   string
 	SecretString  string
 	TokenTime     string
+	Port          string
 )
 
 func GetConfigEnv() {
@@ -81,6 +82,13 @@ func GetConfigEnv() {
 		infologger.Error("TOKEN_EXP_TIME")
 	} else {
 		infologger.Success("TOKEN_EXP_TIME")
+	}
+
+	Port = os.Getenv("PORT")
+	if Port == "" {
+		infologger.Error("PORT")
+	} else {
+		infologger.Success("PORT")
 	}
 
 	infologger.Info("Loaded .env")
