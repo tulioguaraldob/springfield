@@ -13,7 +13,7 @@ import (
 
 type IUserRepository interface {
 	SaveUser(user *model.User) (*model.User, error)
-	ValidateSignIn(login, password string) (string, error)
+	ValidateSignIn(login, password string) (*string, error)
 	GetUsers() ([]model.User, error)
 	GetUserById(userId uint64) (*model.User, error)
 }
@@ -39,27 +39,27 @@ func (r *UserRepository) SaveUser(user *model.User) (*model.User, error) {
 	return user, nil
 }
 
-func (r *UserRepository) ValidateSignIn(login, password string) (string, error) {
+func (r *UserRepository) ValidateSignIn(login, password string) (*string, error) {
 	userToSign := model.User{}
 
 	err := r.db.Where("login = ? AND password = ?", login, password).
 		Take(&userToSign).
 		Error
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	err = VerifyPassword(password, userToSign.Password)
 	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
-		return "", err
+		return nil, err
 	}
 
 	token, err := token.GenerateToken(int(userToSign.ID))
 	if err != nil {
-		return "", nil
+		return nil, err
 	}
 
-	return token, nil
+	return &token, nil
 }
 
 func (r *UserRepository) GetUsers() ([]model.User, error) {

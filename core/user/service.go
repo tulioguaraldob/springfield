@@ -29,7 +29,7 @@ func (s *UserService) SignIn(login, password string) (*string, error) {
 		return nil, err
 	}
 
-	return &token, nil
+	return token, nil
 }
 
 func (s *UserService) GetAllUsers() ([]model.User, error) {
