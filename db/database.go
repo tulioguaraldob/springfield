@@ -5,6 +5,8 @@ import (
 	"log"
 	"os"
 
+	"github.com/TulioGuaraldoB/springfield/db/migration"
+	"github.com/TulioGuaraldoB/springfield/db/seeder"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -25,13 +27,14 @@ func StartDB(
 		MySql_Port,
 		MySql_Db_Name,
 	)
-
 	database, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Error to connect to database: ", err.Error())
 	}
 
 	db = database
+	migration.Run(db)
+	seeder.Run(db)
 }
 
 func ConnectDB() *gorm.DB {

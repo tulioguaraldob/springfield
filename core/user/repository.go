@@ -1,102 +1,55 @@
 package user
 
 import (
-	"html"
-	"strings"
+	"time"
 
-	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 
 	"github.com/TulioGuaraldoB/springfield/model"
-	"github.com/TulioGuaraldoB/springfield/utils/token"
 )
 
-type IUserRepository interface {
-	SaveUser(user *model.User) (*model.User, error)
-	ValidateSignIn(login, password string) (*string, error)
-	GetUsers() ([]model.User, error)
-	GetUserById(userId uint64) (*model.User, error)
+type interfaceRepository interface {
+	getAll() ([]model.User, error)
+	show(id uint) (*model.User, error)
+	create(user *model.User) error
+	delete(id uint) error
 }
 
-type UserRepository struct {
+type repository struct {
 	db *gorm.DB
 }
 
-func NewUserRepository(db *gorm.DB) IUserRepository {
-	return &UserRepository{
+func NewRepository(db *gorm.DB) interfaceRepository {
+	return &repository{
 		db: db,
 	}
 }
 
-var user *model.User
-
-func (r *UserRepository) SaveUser(user *model.User) (*model.User, error) {
-	err := r.db.Create(&user).Error
-	if err != nil {
-		return &model.User{}, err
+func (r *repository) getAll() ([]model.User, error) {
+	users := []model.User{}
+	if err := r.db.Find(&users).Error; err != nil {
+		return nil, err
 	}
 
-	return user, nil
+	return users, nil
 }
 
-func (r *UserRepository) ValidateSignIn(login, password string) (*string, error) {
-	userToSign := model.User{}
+func (r *repository) show(id uint) (*model.User, error) {
+	user := model.User{}
+	if err := r.db.First(&user, &id).Error; err != nil {
+		return nil, err
+	}
 
-	err := r.db.Where("login = ? AND password = ?", login, password).
-		Take(&userToSign).
+	return &user, nil
+}
+
+func (r *repository) create(user *model.User) error {
+	return r.db.Create(&user).Error
+}
+
+func (r *repository) delete(id uint) error {
+	user := model.User{}
+	return r.db.Where(&user.ID, &id).
+		Update("deleted_at", time.Now()).
 		Error
-	if err != nil {
-		return nil, err
-	}
-
-	err = VerifyPassword(password, userToSign.Password)
-	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
-		return nil, err
-	}
-
-	token, err := token.GenerateToken(int(userToSign.ID))
-	if err != nil {
-		return nil, err
-	}
-
-	return &token, nil
-}
-
-func (r *UserRepository) GetUsers() ([]model.User, error) {
-	var allUsers []model.User
-
-	if err := r.db.Find(&allUsers).Error; err != nil {
-		return allUsers, err
-	}
-
-	return allUsers, nil
-}
-
-func (r *UserRepository) GetUserById(userId uint64) (*model.User, error) {
-	var user *model.User
-
-	if err := r.db.First(&user, &userId).Error; err != nil {
-		return nil, err
-	}
-
-	return user, nil
-}
-
-func BeforeSave() error {
-	var u *model.User
-
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return err
-	}
-
-	u.Password = string(hashedPassword)
-
-	u.Login = html.EscapeString(strings.TrimSpace(u.Login))
-
-	return nil
-}
-
-func VerifyPassword(password, hashedPassword string) error {
-	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }

@@ -2,40 +2,35 @@ package user
 
 import "github.com/TulioGuaraldoB/springfield/model"
 
-type IUserService interface {
-	Register(user *model.User) (*model.User, error)
-	SignIn(login, password string) (*string, error)
-	GetAllUsers() ([]model.User, error)
-	GetUserById(uId uint64) (*model.User, error)
+type interfaceService interface {
+	getAll() ([]model.User, error)
+	show(id uint) (*model.User, error)
+	create(user *model.User) error
+	delete(id uint) error
 }
 
-type UserService struct {
-	repository IUserRepository
+type service struct {
+	repository interfaceRepository
 }
 
-func NewUserService(repository IUserRepository) IUserService {
-	return &UserService{
+func NewService(repository interfaceRepository) interfaceService {
+	return &service{
 		repository: repository,
 	}
 }
 
-func (s *UserService) Register(user *model.User) (*model.User, error) {
-	return s.repository.SaveUser(user)
+func (s *service) getAll() ([]model.User, error) {
+	return s.repository.getAll()
 }
 
-func (s *UserService) SignIn(login, password string) (*string, error) {
-	token, err := s.repository.ValidateSignIn(login, password)
-	if err != nil {
-		return nil, err
-	}
-
-	return token, nil
+func (s *service) show(id uint) (*model.User, error) {
+	return s.repository.show(id)
 }
 
-func (s *UserService) GetAllUsers() ([]model.User, error) {
-	return s.repository.GetUsers()
+func (s *service) create(user *model.User) error {
+	return s.repository.create(user)
 }
 
-func (s *UserService) GetUserById(uId uint64) (*model.User, error) {
-	return s.repository.GetUserById(uId)
+func (s *service) delete(id uint) error {
+	return s.repository.delete(id)
 }

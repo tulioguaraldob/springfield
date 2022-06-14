@@ -8,83 +8,74 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type UserController struct {
-	service IUserService
+type controller struct {
+	service interfaceService
 }
 
-func NewUserController(service IUserService) UserController {
-	return UserController{
+func NewUserController(service interfaceService) controller {
+	return controller{
 		service: service,
 	}
 }
 
-func (c *UserController) Register(ctx *gin.Context) {
-	register := RegisterCredentials{}
-
-	if err := ctx.ShouldBindJSON(&register); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	}
-
-	user := model.User{
-		Name:     register.Name,
-		Login:    register.Login,
-		Password: register.Password,
-	}
-
-	_, err := c.service.Register(&user)
+func (c *controller) GetAllUsers(ctx *gin.Context) {
+	users, err := c.service.getAll()
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"data": "registration success!"})
+	allUsersRes := []UserResponse{}
+	userRes := UserResponse{}
+
+	for _, user := range users {
+		UserToResponse(&user, &userRes)
+		allUsersRes = append(allUsersRes, userRes)
+	}
+
+	ctx.JSON(http.StatusOK, allUsersRes)
 }
 
-func (c *UserController) Login(ctx *gin.Context) {
-	signIn := SignInCredentials{}
-
-	if err := ctx.ShouldBindJSON(&signIn); err != nil {
+func (c *controller) GetUserById(ctx *gin.Context) {
+	userId, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
+	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	user := model.User{
-		Login:    signIn.Login,
-		Password: signIn.Password,
-	}
-
-	token, err := c.service.SignIn(user.Login, user.Password)
+	user, err := c.service.show(uint(userId))
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "login or password incorrect"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"token": token})
+	userRes := UserResponse{}
+	UserToResponse(user, &userRes)
+
+	ctx.JSON(http.StatusOK, userRes)
 }
 
-func (c *UserController) GetAllUsers(ctx *gin.Context) {
-	users, err := c.service.GetAllUsers()
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+func (c *controller) Register(ctx *gin.Context) {
+	userInput := UserRequest{}
+	if err := ctx.ShouldBindJSON(&userInput); err != nil {
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"data": users})
-}
+	user := model.User{}
+	RequestToUser(&userInput, &user)
 
-func (c *UserController) GetUserById(ctx *gin.Context) {
-	userId, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := c.service.create(&user); err != nil {
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
 
-	user, err := c.service.GetUserById(userId)
-
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	ctx.JSON(http.StatusOK, gin.H{"data": user})
+	ctx.IndentedJSON(http.StatusOK, gin.H{
+		"message": "user inserted successfully!",
+		"user":    userInput,
+	})
 }
