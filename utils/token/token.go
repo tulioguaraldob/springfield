@@ -2,7 +2,6 @@ package token
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -14,22 +13,14 @@ import (
 
 func GenerateToken(userId int) (string, error) {
 
-	tokenLifeSpan := os.Getenv("TOKEN_EXP_TIME")
-	parsedTokenLifeSpan, err := strconv.Atoi(tokenLifeSpan)
-
-	if err != nil {
-		log.Fatal("Error:", err.Error())
-	}
-
 	claims := jwt.MapClaims{}
 	claims["authorized"] = true
 	claims["user_id"] = userId
-	claims["exp"] = time.Now().Add(time.Hour * time.Duration(parsedTokenLifeSpan)).Unix()
+	claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	return token.SignedString([]byte(os.Getenv("SECRET")))
-
 }
 
 func TokenValid(ctx *gin.Context) error {

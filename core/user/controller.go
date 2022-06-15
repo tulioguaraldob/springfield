@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/TulioGuaraldoB/springfield/model"
+	"github.com/TulioGuaraldoB/springfield/utils/encrypt"
 	"github.com/gin-gonic/gin"
 )
 
@@ -66,6 +67,9 @@ func (c *controller) Register(ctx *gin.Context) {
 
 	user := model.User{}
 	RequestToUser(&userInput, &user)
+
+	hashedPassword := encrypt.ToHash256(user.Password)
+	user.Password = hashedPassword
 
 	if err := c.service.create(&user); err != nil {
 		ctx.IndentedJSON(http.StatusBadRequest, gin.H{
