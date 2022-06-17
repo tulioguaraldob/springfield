@@ -53,3 +53,10 @@ func RequestToUser(req *UserRequest, user *model.User) {
 		Password: req.Password,
 	}
 }
+
+func CredentialsToUser(credentials *SignInCredentials, user *model.User) {
+	*user = model.User{
+		Login:    credentials.Login,
+		Password: credentials.Password,
+	}
+}

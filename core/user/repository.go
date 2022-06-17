@@ -13,6 +13,7 @@ type interfaceRepository interface {
 	show(id uint) (*model.User, error)
 	create(user *model.User) error
 	delete(id uint) error
+	getByCredentials(username, password string) (*model.User, error)
 }
 
 type repository struct {
@@ -52,4 +53,15 @@ func (r *repository) delete(id uint) error {
 	return r.db.Where(&user.ID, &id).
 		Update("deleted_at", time.Now()).
 		Error
+}
+
+func (r *repository) getByCredentials(username, password string) (*model.User, error) {
+	user := model.User{}
+	if err := r.db.Model(&user).
+		Where("Login = ?", username, "Password = ?", password).
+		Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }

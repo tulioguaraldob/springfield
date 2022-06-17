@@ -21,6 +21,7 @@ func ConfigRoutes() *gin.Engine {
 			user := v1.Group("/user")
 			{
 				user.POST("/register", userController.Register)
+				user.POST("/login", userController.Login)
 				user.GET("/", userController.GetAllUsers)
 				user.GET("/:id", userController.GetUserById)
 			}

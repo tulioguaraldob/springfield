@@ -12,7 +12,6 @@ import (
 )
 
 func GenerateToken(userId int) (string, error) {
-
 	claims := jwt.MapClaims{}
 	claims["authorized"] = true
 	claims["user_id"] = userId

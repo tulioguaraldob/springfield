@@ -1,8 +1,5 @@
 ### Environment Variables ###
 .env
 
-### Docker (Compose) ###
-docker-compose.yml
-
 ### Git ###
 .gitpod.yml

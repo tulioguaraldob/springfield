@@ -83,3 +83,26 @@ func (c *controller) Register(ctx *gin.Context) {
 		"user":    userInput,
 	})
 }
+
+func (c *controller) Login(ctx *gin.Context) {
+	userSignIn := SignInCredentials{}
+	if err := ctx.ShouldBindJSON(&userSignIn); err != nil {
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	user := model.User{}
+	CredentialsToUser(&userSignIn, &user)
+
+	token, err := c.service.getByCredentials(user.Login, user.Password)
+	if err != nil {
+		ctx.IndentedJSON(http.StatusUnauthorized, gin.H{
+			"unauthorized": err.Error(),
+		})
+		return
+	}
+
+	ctx.IndentedJSON(http.StatusOK, token)
+}
