@@ -1,108 +1,108 @@
 package user
 
-import (
-	"net/http"
-	"strconv"
+// import (
+// 	"net/http"
+// 	"strconv"
 
-	"github.com/TulioGuaraldoB/springfield/model"
-	"github.com/TulioGuaraldoB/springfield/utils/encrypt"
-	"github.com/gin-gonic/gin"
-)
+// 	"github.com/TulioGuaraldoB/springfield/model"
+// 	"github.com/TulioGuaraldoB/springfield/utils/encrypt"
+// 	"github.com/gin-gonic/gin"
+// )
 
-type controller struct {
-	service interfaceService
-}
+// type controller struct {
+// 	service interfaceService
+// }
 
-func NewUserController(service interfaceService) controller {
-	return controller{
-		service: service,
-	}
-}
+// func NewUserController(service interfaceService) controller {
+// 	return controller{
+// 		service: service,
+// 	}
+// }
 
-func (c *controller) GetAllUsers(ctx *gin.Context) {
-	users, err := c.service.getAll()
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+// func (c *controller) GetAllUsers(ctx *gin.Context) {
+// 	users, err := c.service.getAll()
+// 	if err != nil {
+// 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+// 		return
+// 	}
 
-	allUsersRes := []UserResponse{}
-	userRes := UserResponse{}
+// 	allUsersRes := []UserResponse{}
+// 	userRes := UserResponse{}
 
-	for _, user := range users {
-		UserToResponse(&user, &userRes)
-		allUsersRes = append(allUsersRes, userRes)
-	}
+// 	for _, user := range users {
+// 		UserToResponse(&user, &userRes)
+// 		allUsersRes = append(allUsersRes, userRes)
+// 	}
 
-	ctx.JSON(http.StatusOK, allUsersRes)
-}
+// 	ctx.JSON(http.StatusOK, allUsersRes)
+// }
 
-func (c *controller) GetUserById(ctx *gin.Context) {
-	userId, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+// func (c *controller) GetUserById(ctx *gin.Context) {
+// 	userId, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
+// 	if err != nil {
+// 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+// 		return
+// 	}
 
-	user, err := c.service.show(uint(userId))
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+// 	user, err := c.service.show(uint(userId))
+// 	if err != nil {
+// 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+// 		return
+// 	}
 
-	userRes := UserResponse{}
-	UserToResponse(user, &userRes)
+// 	userRes := UserResponse{}
+// 	UserToResponse(user, &userRes)
 
-	ctx.JSON(http.StatusOK, userRes)
-}
+// 	ctx.JSON(http.StatusOK, userRes)
+// }
 
-func (c *controller) Register(ctx *gin.Context) {
-	userInput := UserRequest{}
-	if err := ctx.ShouldBindJSON(&userInput); err != nil {
-		ctx.IndentedJSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
+// func (c *controller) Register(ctx *gin.Context) {
+// 	userInput := UserRequest{}
+// 	if err := ctx.ShouldBindJSON(&userInput); err != nil {
+// 		ctx.IndentedJSON(http.StatusBadRequest, gin.H{
+// 			"error": err.Error(),
+// 		})
+// 		return
+// 	}
 
-	user := model.User{}
-	RequestToUser(&userInput, &user)
+// 	user := model.User{}
+// 	RequestToUser(&userInput, &user)
 
-	hashedPassword := encrypt.ToHash256(user.Password)
-	user.Password = hashedPassword
+// 	hashedPassword := encrypt.ToHash256(user.Password)
+// 	user.Password = hashedPassword
 
-	if err := c.service.create(&user); err != nil {
-		ctx.IndentedJSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
+// 	if err := c.service.create(&user); err != nil {
+// 		ctx.IndentedJSON(http.StatusBadRequest, gin.H{
+// 			"error": err.Error(),
+// 		})
+// 		return
+// 	}
 
-	ctx.IndentedJSON(http.StatusOK, gin.H{
-		"message": "user inserted successfully!",
-		"user":    userInput,
-	})
-}
+// 	ctx.IndentedJSON(http.StatusOK, gin.H{
+// 		"message": "user inserted successfully!",
+// 		"user":    userInput,
+// 	})
+// }
 
-func (c *controller) Login(ctx *gin.Context) {
-	userSignIn := SignInCredentials{}
-	if err := ctx.ShouldBindJSON(&userSignIn); err != nil {
-		ctx.IndentedJSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
+// func (c *controller) Login(ctx *gin.Context) {
+// 	userSignIn := SignInCredentials{}
+// 	if err := ctx.ShouldBindJSON(&userSignIn); err != nil {
+// 		ctx.IndentedJSON(http.StatusBadRequest, gin.H{
+// 			"error": err.Error(),
+// 		})
+// 		return
+// 	}
 
-	user := model.User{}
-	CredentialsToUser(&userSignIn, &user)
+// 	user := model.User{}
+// 	CredentialsToUser(&userSignIn, &user)
 
-	token, err := c.service.getByCredentials(user.Login, user.Password)
-	if err != nil {
-		ctx.IndentedJSON(http.StatusUnauthorized, gin.H{
-			"unauthorized": err.Error(),
-		})
-		return
-	}
+// 	token, err := c.service.getByCredentials(user.Login, user.Password)
+// 	if err != nil {
+// 		ctx.IndentedJSON(http.StatusUnauthorized, gin.H{
+// 			"unauthorized": err.Error(),
+// 		})
+// 		return
+// 	}
 
-	ctx.IndentedJSON(http.StatusOK, token)
-}
+// 	ctx.IndentedJSON(http.StatusOK, token)
+// }

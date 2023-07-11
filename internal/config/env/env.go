@@ -37,12 +37,12 @@ func GetConfigEnv() {
 		infologger.Success("MYSQL_USER")
 	}
 
-	MySqlPassword = os.Getenv("MYSQL_PASS")
+	MySqlPassword = os.Getenv("MYSQL_PASSWORD")
 	if MySqlPassword == "" {
-		infologger.Error("MYSQL_PASS")
+		infologger.Error("MYSQL_PASSWORD")
 		envNil += 1
 	} else {
-		infologger.Success("MYSQL_PASS")
+		infologger.Success("MYSQL_PASSWORD")
 	}
 
 	MySqlHost = os.Getenv("MYSQL_HOST")

@@ -1,7 +1,7 @@
 package migration
 
 import (
-	"github.com/TulioGuaraldoB/springfield/model"
+	"github.com/TulioGuaraldoB/springfield/internal/core/domain/model"
 	"gorm.io/gorm"
 )
 
