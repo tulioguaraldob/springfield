@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/TulioGuaraldoB/springfield/internal/adapters/repository/mysql/migration"
+	"github.com/TulioGuaraldoB/springfield/internal/adapters/repository/mysql/seed"
 	"github.com/TulioGuaraldoB/springfield/internal/config/env"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -28,6 +29,7 @@ func startDatabase() {
 	log.Println("Connected to MySQL Server")
 
 	migration.Run(db)
+	seed.Run(db)
 }
 
 func OpenConnection() *gorm.DB {

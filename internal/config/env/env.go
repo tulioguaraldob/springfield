@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/TulioGuaraldoB/springfield/utils/log/infologger"
+	"github.com/TulioGuaraldoB/springfield/pkg/log/infologger"
 	"github.com/joho/godotenv"
 )
 

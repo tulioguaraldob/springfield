@@ -24,6 +24,9 @@ func GetRoutes() *fiber.App {
 	api := app.Group("api")
 	user := api.Group("user")
 	user.Get("", userController.GetAllUsers)
+	user.Get(":id", userController.GetUserByUserID)
+	user.Post("", userController.CreateUser)
+	user.Post("login", userController.Login)
 
 	return app
 }

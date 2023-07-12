@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/TulioGuaraldoB/springfield/internal/adapters/api"
 	"github.com/TulioGuaraldoB/springfield/internal/config/env"
-	"github.com/TulioGuaraldoB/springfield/utils/log/infologger"
+	"github.com/TulioGuaraldoB/springfield/pkg/log/infologger"
 )
 
 func main() {

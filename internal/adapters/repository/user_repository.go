@@ -32,3 +32,16 @@ func (r *userRepository) GetUserByID(userId uuid.UUID) (*model.User, error) {
 
 	return user, nil
 }
+
+func (r *userRepository) GetUserByCredentials(login, password string) (*model.User, error) {
+	user := new(model.User)
+	if err := r.db.Where("login = ? AND password = ?", &login, &password).First(&user).Error; err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func (r *userRepository) CreateUser(user *model.User) error {
+	return r.db.Create(user).Error
+}

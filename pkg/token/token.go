@@ -11,10 +11,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GenerateToken(userId int) (string, error) {
+func GenerateToken(userId, userName string) (string, error) {
 	claims := jwt.MapClaims{}
 	claims["authorized"] = true
 	claims["user_id"] = userId
+	claims["user_name"] = userName
 	claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
