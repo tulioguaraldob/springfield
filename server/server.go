@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
 	"github.com/TulioGuaraldoB/springfield/server/routes"
@@ -23,5 +24,8 @@ func NewServer() Server {
 
 func (s *Server) RunServer() {
 	router := routes.ConfigRoutes()
+	config := cors.DefaultConfig()
+	config.AllowAllOrigins = true
+	router.Use(cors.New(config))
 	log.Fatal(router.Run(":" + s.port))
 }
